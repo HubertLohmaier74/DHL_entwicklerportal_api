@@ -19,6 +19,7 @@ Der Wrapper wird noch weiterentwickelt. Im Moment kann er folgende Labels erzeug
 				- WARENPOST NATIONAL
 				- EUROPAKET (= B2B Shipment)
 
+Ausserdem können erzeugte Labels storniert werden.
 
 -------------------------------------------------------------------
 VORAUSSETZUNGEN:
