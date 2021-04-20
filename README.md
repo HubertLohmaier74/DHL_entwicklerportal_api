@@ -47,33 +47,31 @@ a) Öffne die dhl_gks_setup.php und ergänze die folgenden Daten:
 	define( 'DHL_TOKEN', '### Token ###');										// LIVE-PASS (siehe auch Punkt 2b)
 	Das Token muss nach dem Anlegen der APP (im Entwicklerportal) generiert werden. Siehe unter Menü "Freigabe & Betrieb" / "Details" / "Token generieren"
 
-b) Die eigenen Daten dann in der Datei dhl_gks_setup.php hinterlegen unterhalb: COMPANY SETUP
-
-c) In der dhl_gks_setup.php findet man angelegte Beispielkunden (= Empfänger), z.B.:
+b) In der dhl_gks_setup.php findet man angelegte Beispielkunden (= Empfänger), z.B.:
 	Einen NATIONAL - Kunden, z.B. Sendung innerhalb Deutschlands
 	Einen EUROPAKET - Kunden, z.B. Sendung von Deutschland nach Österreich (innerhalb EU)
 	Einen WELTPAKET - Kunden, z.B. Sendung von D. nach Schweiz (ausserhalb EU)
 	Einen EUROPAKET - Kunden (innerhalb EU)
 	Anstatt der Beispielkunden können hier eigene Daten hinterlegt werden.
 	
-d) Zu jedem Kunden/Empfänger ist auch eine Beispiel-Sendung definiert.
+c) Zu jedem Kunden/Empfänger ist auch eine Beispiel-Sendung definiert.
    Nur aus Gründen der Übersichtlichkeit (und der Einfachheit halber) wird hier jedem Kunden derselbe "Artikel" zugeschickt.
    Man kann selbstverständlich jedem Kunden separate Artikel zuweisen.
    
-e) Liegt das Zielland ausserhalb der EU, müssen Zolldaten zu jedem Artikel zugewiesen werden.
+d) Liegt das Zielland ausserhalb der EU, müssen Zolldaten zu jedem Artikel zugewiesen werden.
    Ausserdem muss die Sendung für den Zoll konfiguriert werden (z.B. Gesamtgewicht, etc.)
  
-f) Das Paketobjekt wird erzeugt mit 
+e) Das Paketobjekt wird erzeugt mit 
 
 			$parcel = new DHLParcel();
 	  
-g) Um dhl_gks_setup.php im Sandbox-Mode laufen zu lassen, nutzen Sie den Sandbox-Switch
+f) Um dhl_gks_setup.php im Sandbox-Mode laufen zu lassen, nutzen Sie den Sandbox-Switch
 
 			$parcel->setWorkingMode("SANDBOX", ...
         
    ... sonst kann das Feld leer gelassen oder mit anderem Inhalt z.B. "LIVE" übergeben werden
 		
-h) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen.
+g) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen.
    Dazu gibt es hier die Möglichkeit, die WSDL Datei lokal abzuspeichern
    
 			$parcel->setWorkingMode(..., _USE_LOCAL_WSDL_); 
@@ -83,7 +81,7 @@ h) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen
    (WICHTIG: Dazu muss das Tool am Server Schreibrechte auf dieses Verzeichnis haben)
    Ansonsten übergeben Sie FALSE. Dann wird die WSDL Datei jedes Mal direkt vom DHL Server angesprochen.
 
-i) Danach können die Beispiel-Labels erstellt werden durch einfachen Aufruf von dhl_gks_setup.php
+h) Danach können die Beispiel-Labels erstellt werden durch einfachen Aufruf von dhl_gks_setup.php
    Sind ihre Zugangsdaten korrekt hinterlegt, wird nun für jeden Beispielkunden ein Label erzeugt.
    Danach erhalten Sie Links zum Download, oder können die erzeugten Labels wieder löschen.
    !!! Im Sandbox-Mode sind nach Auskunft vom DHL Support die Download-Links zu den gelöschten Labels weiterhin verfübar, zumindest für geraume Zeit.
