@@ -15,7 +15,7 @@ Der Wrapper wird noch weiterentwickelt. Im Moment kann er folgende Labels erzeug
 				- PAKET NATIONAL (POSTFILIALE)
 				- PAKET NATIONAL (PACKSTATION)
 				- PAKET INTERNATIONAL (for outside EU destinations with customs doc creation)
-				- PAKET INTERNATIONAL (for within EU descriptions without customs doc creation)
+				- PAKET INTERNATIONAL (for within EU destinations without customs doc creation)
 				- WARENPOST NATIONAL
 				- EUROPAKET (= B2B Shipment)
 
