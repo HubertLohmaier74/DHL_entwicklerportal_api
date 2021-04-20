@@ -78,9 +78,9 @@ h) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen
 		    $parcel->setWorkingMode(..., _USE_LOCAL_WSDL_); 
         Werte für _USE_LOCAL_WSDL_ = TRUE/FALSE
         
-		Bei TRUE wird die Datei einmal täglich vom DHL Server heruntergeladen und im Unterverzeichnis dieses Tools zwischengespeichert.
-		(WICHTIG: Dazu muss das Tool am Server Schreibrechte auf dieses Verzeichnis haben)
-		Ansonsten übergeben Sie FALSE. Dann wird die WSDL Datei jedes Mal direkt vom DHL Server angesprochen.
+   Bei TRUE wird die Datei einmal täglich vom DHL Server heruntergeladen und im Unterverzeichnis dieses Tools zwischengespeichert.
+   (WICHTIG: Dazu muss das Tool am Server Schreibrechte auf dieses Verzeichnis haben)
+   Ansonsten übergeben Sie FALSE. Dann wird die WSDL Datei jedes Mal direkt vom DHL Server angesprochen.
 
 i) Danach können die Beispiel-Labels erstellt werden durch einfachen Aufruf von dhl_gks_setup.php
    Sind ihre Zugangsdaten korrekt hinterlegt, wird nun für jeden Beispielkunden ein Label erzeugt.
