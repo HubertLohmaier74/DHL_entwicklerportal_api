@@ -64,19 +64,19 @@ e) Liegt das Zielland ausserhalb der EU, müssen Zolldaten zu jedem Artikel zuge
  
 f) Das Paketobjekt wird erzeugt mit 
 
-		      $parcel = new DHLParcel();
+			$parcel = new DHLParcel();
 	  
 g) Um dhl_gks_setup.php im Sandbox-Mode laufen zu lassen, nutzen Sie den Sandbox-Switch
 
-		    $parcel->setWorkingMode("SANDBOX", ...
+			$parcel->setWorkingMode("SANDBOX", ...
         
    ... sonst kann das Feld leer gelassen oder mit anderem Inhalt z.B. "LIVE" übergeben werden
 		
 h) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen.
    Dazu gibt es hier die Möglichkeit, die WSDL Datei lokal abzuspeichern
    
-		    $parcel->setWorkingMode(..., _USE_LOCAL_WSDL_); 
-        Werte für _USE_LOCAL_WSDL_ = TRUE/FALSE
+			$parcel->setWorkingMode(..., _USE_LOCAL_WSDL_); 
+			Werte für _USE_LOCAL_WSDL_ = TRUE/FALSE
         
    Bei TRUE wird die Datei einmal täglich vom DHL Server heruntergeladen und im Unterverzeichnis dieses Tools zwischengespeichert.
    (WICHTIG: Dazu muss das Tool am Server Schreibrechte auf dieses Verzeichnis haben)
@@ -100,7 +100,7 @@ Ihr Projekt muss diese auswerten.
 In dem Fall wird auch kein Label erzeugt.
 
 
-Wenn Sie den Wrapper aus einem Unterverzeichnis ansprechen, müssen Sie bei einer Fehlermeldung zur Datei "dhl_gks_shipmentconfigurator.php" anstatt
+Wenn Sie den Wrapper über ein Unterverzeichnis ansprechen, müssen Sie bei einer Fehlermeldung zur Datei "dhl_gks_shipmentconfigurator.php" anstatt
 
         require_once("dhl_gks_shipmentconfigurator.php");
         
