@@ -77,7 +77,8 @@ g) DHL fordert die Nutzer der API auf, die WSDL Datei nicht ständig nachzuladen
 			$parcel->setWorkingMode(..., _USE_LOCAL_WSDL_); 
 			Werte für _USE_LOCAL_WSDL_ = TRUE/FALSE
         
-   Bei TRUE wird die Datei einmal täglich vom DHL Server heruntergeladen und im Unterverzeichnis dieses Tools zwischengespeichert.
+   Bei TRUE wird die Datei einmal täglich vom DHL Server heruntergeladen und im Unterverzeichnis dieses Tools 
+   zwischengespeichert, bzw. dort wo Sie die Dateien abgespeichert haben.
    (WICHTIG: Dazu muss das Tool am Server Schreibrechte auf dieses Verzeichnis haben)
    Ansonsten übergeben Sie FALSE. Dann wird die WSDL Datei jedes Mal direkt vom DHL Server angesprochen.
 
