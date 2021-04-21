@@ -1,7 +1,7 @@
 # DHL_entwicklerportal_api
 Creating DHL labels using DHL Entwickler Portal API
 
-Der hier vorgestellte Code ist ein PHP Wrapper für die API aus dem DHL Entwicklerportal zum automatisierten Erstellen von DHL Labels und unterstützt die WSDL Version 3.1.
+Der hier vorgestellte Code ist ein PHP Wrapper für die API aus dem DHL Entwicklerportal zum automatisierten Erstellen von DHL Labels und unterstützt die WSDL Version 3.1.2
 
 Vorab: Dieser Wrapper versteht sich nicht das Musterbeispiel für meist-elegantes Programmieren.
        Vielmehr will er auf einfachste Weise in ein Projekt integriert werden können. (Einfach ein Unterverzeichnis anlegen und alle Dateien hineinkopieren)
@@ -107,6 +107,26 @@ Wenn Sie den Wrapper über ein Unterverzeichnis ansprechen, müssen Sie bei eine
 ggf. diese Schreibweise verwenden
 
         require_once(__DIR__ . "/dhl_gks_shipmentconfigurator.php");
+
+
+-------------------------------------------------------------------
+Unterstützte API Methoden
+-------------------------------------------------------------------
+Im Moment unterstützt der Wrapper lediglich die beiden Methoden zum Erstellen und Stornieren von Labels:
+
+	- createShipmentOrder  (welche ggf. auch gleichzeitig die Exportdokumente erzeugt)
+	- deleteShipmentOrder
+
+Auf einen Tagesabschluss verzichte ich, da dieser von DHL ohnehin automatisch durchgeführt wird.
+Und auch über den Sinn und Unsinn der anderen API Methoden kann man streiten.
+
+-------------------------------------------------------------------
+Noch nicht umgesetzt
+-------------------------------------------------------------------
+In der aktuellen Version sind die Optionen für die DHL Services noch nicht frei einstellbar.
+So kann für internationale Pakete z.B. noch nicht gewählt werden, ob Premium verschickt werden soll oder nicht. (Default: Nein)
+Oder ob der Empfänger benachrichtigt werden soll oder nicht. (Default: Ja)
+Etc.
 
 -------------------------------------------------------------------
 # ENDE
