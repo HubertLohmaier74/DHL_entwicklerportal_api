@@ -7,10 +7,11 @@
 <body>
 
 <?php 
-	// ...............................
-	// .. SETUP EXAMPLE VERSION 1.0 ..
-	// .. 20.04.2021                ..
-	// ...............................
+	// ................................................
+	// .. SETUP EXAMPLE VERSION             1.1      ..
+	// .. 20.04.2021                                 ..
+	// .. 21.04. Upgrade to WSDL Version 3.1.2       ..
+	// ................................................
 	
 
 
@@ -78,8 +79,9 @@
 	define( '_DHL_SANDBOX_URL_', 'https://cig.dhl.de/services/sandbox/soap' );				// SANDBOX ENDPOINT 
 	define( '_DHL_PRODUCTION_URL_', 'https://cig.dhl.de/services/production/soap' );		// LIVE ENDPOINT 
 	
-	define( '_DHL_API_FILE_', 'geschaeftskundenversand-api-3.1.wsdl' );
-	define( '_DHL_API_DIR_', 'cig-wsdls/com/dpdhl/wsdl/geschaeftskundenversand-api/3.1/' );
+	define( '_DHL_WSDL_VERSION_', '3.1.2' );
+	define( '_DHL_API_FILE_', 'geschaeftskundenversand-api-'._DHL_WSDL_VERSION_.'.wsdl');
+	define( '_DHL_API_DIR_', 'cig-wsdls/com/dpdhl/wsdl/geschaeftskundenversand-api/'._DHL_WSDL_VERSION_.'/');
 	define( '_DHL_API_URL_', 'https://cig.dhl.de/' . _DHL_API_DIR_ . _DHL_API_FILE_ );
 
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
