@@ -82,11 +82,11 @@ class DHLParcel {
 		
 		// include USER-ID in Filename?
 		if ($this->userID != "") 
-			$userID = $this->userID . "-";
+			$userID = $this->userID . "_";
 		else $userID = "";
 				
 		// Filename setup
-		$requestFile = $requestDir . "/" . $userID . str_replace('.', date("Y.m.d H:i", time()).'.', $requestFile);
+		$requestFile = $requestDir . "/" . $userID . str_replace('.', date("Y-m-d H:i", time()).'.', $requestFile);
 			
 		if ($this->storeRequests) {
 
