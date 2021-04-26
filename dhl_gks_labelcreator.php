@@ -15,6 +15,8 @@
 //  Updated to use WSDL file from local directory
 //  (c) Hubert Lohmaier, 13.04.2021
 //
+//	- 23.04.2021: Receiver notification only possible if email address not empty
+//	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with  street_name
 // ***************************************************************************************
 class DHLBusinessShipment {
 
@@ -24,28 +26,28 @@ class DHLBusinessShipment {
 	private $client;
 	private $errors;
 	private $sandbox;
-	public $WSDL;
+//	public $WSDL;		26.04.
+	private $WSDL;
 
 	// --------------------------------------------------------
+	// Constructor for Shipment SDK
 	// --------------------------------------------------------
+	//
+	//
+	// @param type $api_credentials
+	// @param type $customer_company
+	// @param boolean $sandbox use sandbox or production environment
+	// 
+	// $api_file 		= pure filename to WSDL (without path or URL)
+	// $api_url 		= total URL (incl. https + path + filename)
 	// --------------------------------------------------------
-	/**
-	 * Constructor for Shipment SDK
-	 *
-	 * @param type $api_credentials
-	 * @param type $customer_company
-	 * @param boolean $sandbox use sandbox or production environment
-	 * 
-	 * $api_file = pure filename to WSDL (without path or URL)
-	 * $api_url = total URL (incl. https + path + filename)
-	 */
 	function __construct( $api_credentials, $company, $api_file, $api_url, $sandbox = TRUE ) {
-		$this->credentials 	= $api_credentials;
-		$this->company      = $company;
-		$this->sandbox 		= $sandbox;
-		$this->errors 		= array();
-		$this->shipmentList	= array();
-		$this->WSDL			= array( "local" => FALSE, "directory" => "", "API_FILE" => "/" . trim($api_file, "/"), "API_URL"=> $api_url );
+		$this->credentials 		= $api_credentials;
+		$this->company      	= $company;
+		$this->sandbox 			= $sandbox;
+		$this->errors 			= array();
+		$this->shipmentList		= array();
+		$this->WSDL				= array( "local" => FALSE, "directory" => "", "API_FILE" => "/" . trim($api_file, "/"), "API_URL"=> $api_url );
 	}
 	// --------------------------------------------------------
 
@@ -144,6 +146,8 @@ class DHLBusinessShipment {
 		return FALSE;
 	}
 
+
+
 	// --------------------------------------------------------
 	// use WSDL from local file
 	// (tries to uses local file but switches back if conditions fail)
@@ -207,6 +211,7 @@ class DHLBusinessShipment {
 	// --------------------------------------------------------
 
 
+
 	// --------------------------------------------------------
 	// build Soap Client
 	// --------------------------------------------------------
@@ -241,6 +246,7 @@ class DHLBusinessShipment {
 	// --------------------------------------------------------
 
 
+
 	// --------------------------------------------------------
 	// create a cancel request for one or more labels with corresponding shipment no.
 	//
@@ -261,6 +267,7 @@ class DHLBusinessShipment {
 		
 		return $delete;
 	}
+
 
 
 	// --------------------------------------------------------
@@ -315,7 +322,7 @@ class DHLBusinessShipment {
 							break;
 		}
 
-		if ( $myCustomer['notification'] )
+		if ( $myCustomer['notification'] && $myCustomer[email] != "") // 23.04.2021
 			$sd['Notification']['recipientEmailAddress'] = $myCustomer['email'];
 		else
 			$sd['Notification']['recipientEmailAddress'] = "";
@@ -379,6 +386,8 @@ class DHLBusinessShipment {
 								// In this case the field street_number may not be given over to the API
 								if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
 								  $receiver['Address']['streetNumber']	= $myCustomer['street_number'];
+								else 
+								  $receiver['Address']['streetNumber']	= " ";
 								$receiver['Address']['zip']				= $myCustomer['zip'];
 								$receiver['Address']['city']			= $myCustomer['city'];
 								$receiver['Address']['Origin'] 			= array();
@@ -395,7 +404,12 @@ class DHLBusinessShipment {
 								$receiver['Address']['name2']			= $myCustomer['name2'];
 								$receiver['Address']['name3']			= $myCustomer['name3'];
 								$receiver['Address']['streetName']		= $myCustomer['street_name'];
-								$receiver['Address']['streetNumber']	= $myCustomer['street_number'];
+								// DHL API Update 08.04.2021: street_name & street_number can be delivered together in 1 field (street_name)
+								// In this case the field street_number may not be given over to the API
+								if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
+								  $receiver['Address']['streetNumber']	= $myCustomer['street_number'];
+								else 
+								  $receiver['Address']['streetNumber']	= " ";
 								$receiver['Address']['zip']				= $myCustomer['zip'];
 								$receiver['Address']['city']			= $myCustomer['city'];
 								$receiver['Address']['Origin'] 			= array();
@@ -431,7 +445,12 @@ class DHLBusinessShipment {
 								$dhl_receiver						= array();
 								$dhl_receiver['parcelShopNumber']	= $myCustomer['name2'];
 								$dhl_receiver['streetName']			= $myCustomer['street_name'];
-								$dhl_receiver['streetNumber']		= $myCustomer['street_number'];
+								// DHL API Update 08.04.2021: street_name & street_number can be delivered together in 1 field (street_name)
+								// In this case the field street_number may not be given over to the API
+								if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
+								  $dhl_receiver['Address']['streetNumber']	= $myCustomer['street_number'];
+								else 
+								  $dhl_receiver['Address']['streetNumber']	= " ";
 								$dhl_receiver['zip']				= $myCustomer['zip'];
 								$dhl_receiver['city']				= $myCustomer['city'];
 								$dhl_receiver['Origin'] 			= array();
@@ -448,7 +467,10 @@ class DHLBusinessShipment {
 						$receiver['Address']['name2']						= $myCustomer['name2'];
 						$receiver['Address']['name3']						= $myCustomer['name3'];
 						$receiver['Address']['streetName']					= $myCustomer['street_name'];
-						$receiver['Address']['streetNumber']				= $myCustomer['street_number'];
+						// DHL API Update 08.04.2021: street_name & street_number can be delivered together in 1 field (street_name)
+						// In this case the field street_number may not be given over to the API
+						if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
+						  $receiver['Address']['streetNumber']	= $myCustomer['street_number'];
 						$receiver['Address']['addressAddition']				= $myCustomer['addressAddition'];
 						$receiver['Address']['dispatchingInformation']		= $myCustomer['dispatchingInformation'];
 						$receiver['Address']['zip']							= $myCustomer['zip'];
@@ -503,8 +525,6 @@ class DHLBusinessShipment {
 		// Leitcodierung
 		$shipment['ShipmentOrder']['PrintOnlyIfCodeable active'] = $this->company['PrintOnlyIfCodeable active'];	// false (true = only if using Leitcodierung: https://www.dhl.de/de/geschaeftskunden/paket/information/geschaeftskunden/abrechnung/leitcodierung.html)
 
-//echo "<pre>"; var_dump($shipment); // Dump this REQUEST for debugging
-
 		return $shipment;
 		
 	// END createShipmentRequest()
@@ -541,6 +561,7 @@ class DHLBusinessShipment {
 	// --------------------------------------------------------
 
 
+
 	// --------------------------------------------------------
 	// Delete all labels included in this deletion request
 	// --------------------------------------------------------
@@ -562,6 +583,7 @@ class DHLBusinessShipment {
 	}
 
 
+
 	// --------------------------------------------------------
 	// Create label for this shipment request.
 	// A shipment request has to be created before via createShipmentRequest
@@ -579,6 +601,8 @@ class DHLBusinessShipment {
 		// ........................................................
 		try {
 			$response = $this->client->ValidateShipment ( $shipmentRequest );
+			if ($this->responseFile != "") 
+				$stored = $this->storeResponseFile($response, "VALIDATE");
 
 		} catch (Exception $e) {
 			$this->addError($e->faultstring); 				// faultstring = soap intern
@@ -586,7 +610,7 @@ class DHLBusinessShipment {
 		}
 		
 		if ( $response->Status->statusCode != 0 ) {
-			$this->addError($response->Status->statusText);							// StatusMessage = from DHL response
+			$this->addError($response->Status->statusText);
 			foreach ($response->ValidationState->Status->statusMessage AS $message)
 				$this->addError($message);
 			return array("ERR" => "VALIDATION ERROR");
@@ -596,13 +620,15 @@ class DHLBusinessShipment {
 			// 2. CREATE LABEL
 			// ........................................................
 			$response = $this->client->createShipmentOrder( $shipmentRequest );
+			if ($this->responseFile != "") 
+				$stored = $this->storeResponseFile($response, "CREATE");
 
 			if ( is_soap_fault( $response ) || $response->Status->statusCode != 0 ) {
 
 				if ( is_soap_fault( $response ) ) {
 					$this->addError($response->faultstring);			// faultstring = soap intern
 				} else {
-					$this->addError($response->Status->statusText);	// StatusMessage = from DHL response
+					$this->addError($response->Status->statusText);
 				}
 
 				return array("ERR" => "CREATION ERROR");

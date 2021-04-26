@@ -7,11 +7,20 @@
 <body>
 
 <?php 
-	// ................................................
-	// .. SETUP EXAMPLE VERSION             1.1      ..
-	// .. 20.04.2021                                 ..
-	// .. 21.04. Upgrade to WSDL Version 3.1.2       ..
-	// ................................................
+	// ..........................................................................................
+	// .. SETUP EXAMPLE VERSION             1.1                                                ..
+	// .. 20.04.2021                                                                           ..
+	// .. 21.04. Upgrade to WSDL Version 3.1.2                                                 ..
+	// ..                                                                                      ..
+	// .. 26.04. DHL-API Update from 08.04.2021                                                ..
+	// ..        Street-No. got optional field, can be given over together with  street_name   ..
+	// ..                                                                                      ..
+	// .. 26.04. Requests can be saved to server                                               ..
+	// ..        For this reason setWorkingMode got a 3.  parameter (TRUE/FALSE)               ..
+	// ..                                                                                      ..
+	// .. 26.04. Request files: Naming files with user ID prefix                               ..
+	// ..        For this reason setWorkingMode got a 4. parameter (string)             	   ..
+	// ..........................................................................................
 	
 
 
@@ -59,11 +68,11 @@
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	// DEFINES 1 (these are to change for your personal use)
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
-	define( '_DHL_Entwickler_ID_', 'Your developer ID');			// SANDBOX-USER
+	define( '_DHL_Entwickler_ID_', 'Your DHL Entwickler-ID ');		// SANDBOX-USER
 	define( '_DHL_APP_ID_', 'Your APP ID');							// LIVE-USER
 
-	define( 'DHL_WebSitePass', 'Your website pass for DHL Entwicklerportal');		// SANDBOX-PASS
-	define( 'DHL_TOKEN', 'Your Token');												// LIVE-PASS
+	define( 'DHL_WebSitePass', 'Your DHL Entwickler-Website-Pass');			// SANDBOX-PASS
+	define( 'DHL_TOKEN', 'Your Token');										// LIVE-PASS
 
 	define( '_USE_LOCAL_WSDL_', TRUE); 							// Read this if you have sufficient access rights for saving files to your server directory:
 																//
@@ -253,7 +262,7 @@ if (count($_POST) == 0) {
 	$ps_country       	= "GERMANY";
 	$ps_countryISOCode 	= "DE";							// country converted into ISO code. Also see e.g. https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
 	$ps_state			= "";			// not used for NATIONAL
-	$ps_email			= "Maria.Mustermann@g_mail.com";
+	$ps_email			= "Maria.Mustermann@gmail.net";
 	$ps_phone			= "0990155555";
 	$ps_notifyCustomer	= TRUE;							// TRUE/FALSE: allow DHL to send tracking information to your customer
 
@@ -275,7 +284,7 @@ if (count($_POST) == 0) {
 	$pf_country       	= "GERMANY";
 	$pf_countryISOCode 	= "DE";							// country converted into ISO code. Also see e.g. https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
 	$pf_state			= "";				// not used for NATIONAL
-	$pf_email			= "Maria.Mustermann@g_mail.com";
+	$pf_email			= "Maria.Mustermann@gmail.net";
 	$pf_phone			= "0990166666";
 	$pf_notifyCustomer	= TRUE;							// TRUE/FALSE: allow DHL to send tracking information to your customer
 
@@ -338,7 +347,7 @@ if (count($_POST) == 0) {
 	$parcel = new DHLParcel();
 	
 		//call these methods only once for this object
-		$parcel->setWorkingMode("SANDBOX", _USE_LOCAL_WSDL_); // 1.SANDBOX / LIVE, 2. TRUE/FALSE
+		$parcel->setWorkingMode("SANDBOX", _USE_LOCAL_WSDL_, TRUE); // 1.SANDBOX/LIVE, 2. TRUE/FALSE: use an own WSDL-File from your server / 3. TRUE/FALSE: store Requests to server
 		$parcel->setApiLocation(_DHL_API_FILE_, _DHL_API_URL_);
 		$parcel->addCredentials($user, $signature, $ekp, $api_user, $api_password, $teilnahme);
 		$parcel->addCompany($my_use_of_leitcodierung, $my_company_name1, $my_company_name2, $my_company_name3, $my_street_name, $my_street_number, $my_zip, $my_city, $my_country, $my_countryISOCode, $my_email, $my_phone, $my_internet, $my_contact_person);

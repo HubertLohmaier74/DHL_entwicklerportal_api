@@ -1,5 +1,16 @@
 <?php
+// ***************************************************************************************
+//  (c) Hubert Lohmaier, 13.04.2021
+//
+//	- 26.04.2021: 	- Added function storeRequestFile()
+//  				- Function expanded: setWorkingMode: 
+//								3.Parameter = storing a request file 
+//								4.Parameter = optional user-id in request Filename
+// ***************************************************************************************
+
 require_once('dhl_gks_labelcreator.php');
+define('_CREATEREQUEST_FILE_', 'CREATE.TXT');	// for storing a request
+define('_DELETEREQUEST_FILE_', 'DELETE.TXT');	// for storing a request
 
 class DHLParcel {
 
@@ -13,21 +24,24 @@ class DHLParcel {
 	private $localWSDL;				// bool: FALSE or TRUE: make use of local WSDL file or get if from DHL server
 	private $api_file;				// pure filename of WSDL-File (without path or URL)
 	private $api_url;				// complete URL for WSDL-File (incl. URL + path + filename)
-
+	private $storeRequests;			// Enable/Disable storing requests to file
+	private $userID;				// storing requests to filename with user id
 
 	// ----------------------------------------------------------
 	// Constructor
 	// ----------------------------------------------------------
 	function __construct() {
-		$this->validSetup 	= array("credentials"=>FALSE, "company"=>FALSE, "customers"=>FALSE, "api"=>FALSE);
-		$this->credentials	= array();
-		$this->company 		= array();
-		$this->customers 	= array();
-		$this->shipments 	= array();
-		$this->export 		= array();
-		$this->setWorkingMode(); 				// Default = SANDBOX mode
-		$this->api_file		= "";
-		$this->api_url		= "";
+		$this->validSetup 		= array("credentials"=>FALSE, "company"=>FALSE, "customers"=>FALSE, "api"=>FALSE);
+		$this->credentials		= array();
+		$this->company 			= array();
+		$this->customers 		= array();
+		$this->shipments 		= array();
+		$this->export 			= array();
+		$this->setWorkingMode();			// Default = SANDBOX mode
+		$this->api_file			= "";
+		$this->api_url			= "";
+		$this->storeRequests	= FALSE;
+		$this->userID			= "";
 	}
 	// ----------------------------------------------------------
 
@@ -36,13 +50,64 @@ class DHLParcel {
 	// ----------------------------------------------------------
 	// 1. "SANDBOX" or "LIVE" mode (Default = SANDBOX)
 	// 2. make use of a local WSDL file or use it from DHL server (Default = DHL SERVER)
+	// 3. Enable/Disable storing requests to file
+	// 4. (optional) User-ID for stored requests
 	// ----------------------------------------------------------
-	public function setWorkingMode($mode = "SANDBOX", $localWSDL = FALSE) {
-		$this->mode = $mode;
-		$this->localWSDL = $localWSDL;
+	public function setWorkingMode($mode = "SANDBOX", $localWSDL = FALSE, $storeRequests = FALSE, $userID = "") {
+		$this->mode 			= trim($mode);
+		$this->localWSDL 		= (bool)$localWSDL;
+		$this->storeRequests 	= (bool)$storeRequests;
+		$this->userID			= trim($userID);
 	}
 	// ----------------------------------------------------------
 
+
+
+	// --------------------------------------------------------
+	// Store API request to the file given
+	// --------------------------------------------------------
+	// 1. A subdirectory "api_request" will be created if it does not exist.
+	// 2. The subdirectory will created below act. directory of this file
+	// 3. For not overwriting a file the filename will be expanded with 
+	//    a timestamp before the DOT '.'
+	//
+	// PARM: 	1. an API request
+	//			2. Basic Filename
+	//
+	// RETURN: TRUE if saved successfully, otherwise FALSE
+	// --------------------------------------------------------
+	private function storeRequestFile($request, $requestFile) {
+		$subdirectory = "/api_request";
+		$requestDir = __DIR__ . $subdirectory;
+		
+		// include USER-ID in Filename?
+		if ($this->userID != "") 
+			$userID = $this->userID . "-";
+		else $userID = "";
+				
+		// Filename setup
+		$requestFile = $requestDir . "/" . $userID . str_replace('.', date("Y.m.d H:i", time()).'.', $requestFile);
+			
+		if ($this->storeRequests) {
+
+			// Create DIR if it does not exist
+			if ( !is_dir($requestDir) ) {
+				if ( !mkdir($requestDir) ) {
+					$this->addError("Cannot create request directory on server");
+					return FALSE;
+				} 
+			}
+			
+			ob_start();
+			echo "REQUEST FOR USER: " . $this->userID . "\r\n\r\n";
+			print_r($request);
+			$request = ob_get_contents();
+			ob_end_clean();
+			
+			file_put_contents($requestFile, $request);
+		}
+	}
+	
 
 
 	// ----------------------------------------------------------
@@ -50,11 +115,14 @@ class DHLParcel {
 	// $api_url = total URL (incl. https + path + filename)
 	// ----------------------------------------------------------
 	public function setApiLocation($api_file, $api_url) {
-		$this->api_file = $api_file;
-		$this->api_url = $api_url;
-		$this->validSetup["api"] = TRUE;
+		$this->api_file 		 = trim($api_file);
+		$this->api_url 			 = trim($api_url);
+		
+		if ($this->api_file != "" && $this->api_url != "")
+			$this->validSetup["api"] = TRUE;
 	}
-	
+
+
 	
 	// ----------------------------------------------------------
 	// add your dhl customer and api credentials
@@ -368,6 +436,7 @@ class DHLParcel {
 		$dhl = new DHLBusinessShipment($this->credentials, $this->company, $this->api_file, $this->api_url, $mode); // Constructs object
 		$dhl->setLocalWSDL($this->localWSDL); // use WSDL file from local dir or from DHL server?
 		$deleteRequest = $dhl->createShipmentDeleteRequest($shipmentLabelList);
+		$this->storeRequestFile($deleteRequest, _DELETEREQUEST_FILE_);
 		$response = $dhl->deleteDHLLabel($deleteRequest);
 		
 		if ($response['ERR'] != "")
@@ -415,6 +484,7 @@ class DHLParcel {
 					return array("TYPE"=>"ERROR", "CODE"=>8, "CLSS"=>"DHLParcel Class", "REF"=>$shipment['customerReference'], "MSG"=>"INTERNAL: INVALID CUSTOMER", "MORE"=>array("This error should not have appeared!"));
 				
 				$shipmentRequest = $dhl->createShipmentRequest($shipment, $customer , $export);
+				$this->storeRequestFile($shipmentRequest, _CREATEREQUEST_FILE_);
 				$response = $dhl->createDHLLabel($shipmentRequest); // Validation + Creation
 
 				if ($response['ERR'] != "") {
