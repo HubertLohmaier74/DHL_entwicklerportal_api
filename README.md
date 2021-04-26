@@ -123,11 +123,17 @@ Und auch über den Sinn und Unsinn der anderen API Methoden kann man streiten.
 -------------------------------------------------------------------
 Noch nicht umgesetzt
 -------------------------------------------------------------------
-In der aktuellen Version sind die Optionen für die DHL Services noch nicht frei einstellbar.
-So kann für internationale Pakete z.B. noch nicht gewählt werden, ob Premium verschickt werden soll oder nicht. (Default: Nein)
-Oder ob der Empfänger benachrichtigt werden soll oder nicht. (Default: Ja)
-Etc.
+In der aktuellen Version sind nicht für alle DHL Services Optionen vorhanden.
+Z.B. Höherversicherung oder Altersprüfungen müssten selbst bzw. auf Anfrage noch umgesetzt werden.
 
+-------------------------------------------------------------------
+NEU
+-------------------------------------------------------------------
+1. Für internationale Pakete kann jetzt gewählt werden, ob Premium verschickt werden soll oder nicht.
+2. Ausserdem kann nun gewählt werden, ob der Empfänger benachrichtigt werden soll oder nicht. (Dazu muss eine Mailadresse des Empfängers vorhanden sein.
+3. Für internationale Pakete kann eingestellt werden, ob die Sendung bei Nichtantreffen des Empfängers zurückgeschickt oder preisgegeben werden soll.
+4. Der erzeugte Request kann gespeichert werden. Dazu erhielt die Funktion setWorkingMode() 2 zusätzliche (optionale) Parameter
+		$parcel->setWorkingMode(... , ... , TRUE, "USER PREFIX FOR FILENAME OR LEAVE IT EMPTY");
 -------------------------------------------------------------------
 # ENDE
 -------------------------------------------------------------------
