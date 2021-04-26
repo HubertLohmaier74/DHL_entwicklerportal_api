@@ -133,7 +133,9 @@ NEU
 2. Ausserdem kann nun gewählt werden, ob der Empfänger benachrichtigt werden soll oder nicht. (Dazu muss eine Mailadresse des Empfängers vorhanden sein.
 3. Für internationale Pakete kann eingestellt werden, ob die Sendung bei Nichtantreffen des Empfängers zurückgeschickt oder preisgegeben werden soll.
 4. Der erzeugte Request kann gespeichert werden. Dazu erhielt die Funktion setWorkingMode() 2 zusätzliche (optionale) Parameter
-	- $parcel->setWorkingMode(... , ... , TRUE, "USER PREFIX FOR FILENAME OR LEAVE IT EMPTY");
+
+		- $parcel->setWorkingMode(... , ... , TRUE, "USER PREFIX FOR FILENAME OR LEAVE IT EMPTY");
+
 -------------------------------------------------------------------
 # ENDE
 -------------------------------------------------------------------
