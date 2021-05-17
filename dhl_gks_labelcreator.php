@@ -17,6 +17,7 @@
 //
 //	- 23.04.2021: Receiver notification only possible if email address not empty
 //	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with  street_name
+//  - 06.05.2021: 'ShipperReference' in Request aufgenommen (Company-Reference)
 // ***************************************************************************************
 class DHLBusinessShipment {
 
@@ -269,6 +270,14 @@ class DHLBusinessShipment {
 	}
 
 
+	// --------------------------------------------------------
+	// Get an address block for a certain request depending on 
+	// which product and delivery target is chosen
+	// --------------------------------------------------------
+	public function getReceiverAddressBlock( $product, $dhl ) {
+		
+	}
+
 
 	// --------------------------------------------------------
 	// Create a shipment request for a certain shipment
@@ -343,6 +352,9 @@ class DHLBusinessShipment {
 		$shipper['Name']['name1'] = $this->company['name1'];
 		$shipper['Name']['name2'] = $this->company['name2'];
 		$shipper['Name']['name3'] = $this->company['name3'];
+		
+		// Company's reference
+		$shipper['ShipperReference'] = $this->company['reference'];
 
 		// Company's address
 		$shipper['Address']						= array();
@@ -374,27 +386,18 @@ class DHLBusinessShipment {
 		$receiver = array();
 		$receiver['name1']							= $myCustomer['name1'];
 
+		
+
 		// Receiver's address
 		switch ( $myShipment['product'] ) {
 		
 			case "V62WP" :
-								$receiver['Address'] = array();
-								$receiver['Address']['name2']			= $myCustomer['name2'];
-								$receiver['Address']['name3']			= $myCustomer['name3'];
-								$receiver['Address']['streetName']		= $myCustomer['street_name'];
-								// DHL API Update 08.04.2021: street_name & street_number can be delivered together in 1 field (street_name)
-								// In this case the field street_number may not be given over to the API
-								if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
-								  $receiver['Address']['streetNumber']	= $myCustomer['street_number'];
-								else 
-								  $receiver['Address']['streetNumber']	= " ";
-								$receiver['Address']['zip']				= $myCustomer['zip'];
-								$receiver['Address']['city']			= $myCustomer['city'];
-								$receiver['Address']['Origin'] 			= array();
-								$receiver['Address']['Origin']['country']			= $myCustomer['country'];
-								$receiver['Address']['Origin']['countryISOCode']	= $myCustomer['countryISOCode'];
-								$receiver['Address']['Origin']['state']				= $myCustomer['state'];
-				break; // end V62WP
+				// V62WP darf nur im Innland verwendet werden
+				if ($myCustomer['countryISOCode'] != "DE") {
+					$this->addError("WARENPOST V62WP not valid for internatonal shipment!");
+					return;
+				}
+				// !!! HIER KEIN BREAK => Fortsetzung bei V01PAK
 				
 			case "V01PAK" :
 				switch ( $myCustomer['dhl_receiver'] ) {
@@ -415,9 +418,11 @@ class DHLBusinessShipment {
 								$receiver['Address']['Origin'] 			= array();
 								$receiver['Address']['Origin']['country']			= $myCustomer['country'];
 								$receiver['Address']['Origin']['countryISOCode']	= $myCustomer['countryISOCode'];
+								if ($myShipment['product'] == "V62WP")
+								  $receiver['Address']['Origin']['state']				= $myCustomer['state'];
 								break;
 								
-					case "PACKSTATION" :
+					case "PACKSTATION" :						
 								$dhl_receiver						= array();
 								$dhl_receiver['postNumber']			= $myCustomer['name2'];
 								$dhl_receiver['packstationNumber']	= $myCustomer['name3'];
@@ -454,7 +459,7 @@ class DHLBusinessShipment {
 								$dhl_receiver['zip']				= $myCustomer['zip'];
 								$dhl_receiver['city']				= $myCustomer['city'];
 								$dhl_receiver['Origin'] 			= array();
-								//$dhl_receiver['Origin']['country']			= $myCustomer['country'];
+								$dhl_receiver['Origin']['country']			= $myCustomer['country'];
 								$dhl_receiver['Origin']['countryISOCode']	= $myCustomer['countryISOCode'];
 								$receiver['ParcelShop'] = $dhl_receiver;
 								break;
@@ -471,6 +476,8 @@ class DHLBusinessShipment {
 						// In this case the field street_number may not be given over to the API
 						if ($myCustomer['street_number'] != "###ELIMINATE @ THIS###")
 						  $receiver['Address']['streetNumber']	= $myCustomer['street_number'];
+						else 
+						  $receiver['Address']['streetNumber']	= " ";
 						$receiver['Address']['addressAddition']				= $myCustomer['addressAddition'];
 						$receiver['Address']['dispatchingInformation']		= $myCustomer['dispatchingInformation'];
 						$receiver['Address']['zip']							= $myCustomer['zip'];

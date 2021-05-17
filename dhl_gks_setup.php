@@ -8,18 +8,23 @@
 
 <?php 
 	// ..........................................................................................
-	// .. SETUP EXAMPLE VERSION             1.1                                                ..
+	// .. SETUP EXAMPLE VERSION             1.2                                                ..
 	// .. 20.04.2021                                                                           ..
 	// .. 21.04. Upgrade to WSDL Version 3.1.2                                                 ..
 	// ..                                                                                      ..
 	// .. 26.04. DHL-API Update from 08.04.2021                                                ..
-	// ..        Street-No. got optional field, can be given over together with  street_name   ..
+	// ..        'street_number' got optional field, can be set together with 'street_name'    ..
 	// ..                                                                                      ..
 	// .. 26.04. Requests can be saved to server                                               ..
-	// ..        For this reason setWorkingMode got a 3.  parameter (TRUE/FALSE)               ..
+	// ..        For this reason setWorkingMode got a 3. parameter (TRUE/FALSE)                ..
 	// ..                                                                                      ..
-	// .. 26.04. Request files: Naming files with user ID prefix                               ..
+	// .. 26.04. Request files: Naming files with (e.g. user ID) prefix                        ..
 	// ..        For this reason setWorkingMode got a 4. parameter (string)             	   ..
+	// ..                                                                                      ..
+	// .. 06.05. New: A reference to your company may be added as last parm to addCompany()    ..
+	// ..                                                                                      ..
+	// .. 17.05. Some syntax / content cleaning for easier use                                 ..
+	// ..                                                                                      ..
 	// ..........................................................................................
 	
 
@@ -35,8 +40,6 @@
 	// Tabelle: DHL Produkte, Verfahren, Services
 	// https://handbuch.mauve.de/DHL-Service#Unterst.C3.BCtzte_DHL-Services
 	
-	// In der Produktivumgebung ist im Header zusätzlich zwingend die SOAPAction der jeweiligen Operation mit anzugeben, bspw. 
-	// "SOAPAction: "urn:createShipmentOrder"[\r][\n]"
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	// !!! NOTE: IF USING GERMAN CHARACTERS LIKE Ü,Ö,Ä, etc. make shure you are storing this file in UTF-8 format !!!
@@ -68,19 +71,50 @@
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	// DEFINES 1 (these are to change for your personal use)
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
-	define( '_DHL_Entwickler_ID_', 'Your DHL Entwickler-ID ');		// SANDBOX-USER
+	define( '_WORKING_MODE_', 'SANDBOX');							// Change this from 'SANDBOX' to 'LIVE' for production mode
+	
+	define( '_DHL_Entwickler_ID_', 'Your DHL Entwickler-ID');		// SANDBOX-USER
 	define( '_DHL_APP_ID_', 'Your APP ID');							// LIVE-USER
 
-	define( 'DHL_WebSitePass', 'Your DHL Entwickler-Website-Pass');			// SANDBOX-PASS
-	define( 'DHL_TOKEN', 'Your Token');										// LIVE-PASS
+	define( '_DHL_WebSitePass_', 'Your DHL Entwickler-Website-Pass');		// SANDBOX-PASS
+	define( '_DHL_TOKEN_', 'Your Token');									// LIVE-PASS
 
-	define( '_USE_LOCAL_WSDL_', TRUE); 							// Read this if you have sufficient access rights for saving files to your server directory:
-																//
-																// DHL requests their users not to load the WSDL file every time creating or validating a label because of traffic reasons.
-																// Instead they ask for saving the WSDL to a local directory and refreshing it only if needed.
-																// Setting the value to TRUE means that the WSDL file is loaded only once every day.
-																// This will not work if you are not allowed to save files to your server directory. 
-																// In this case choose "FALSE" for loading WSDL from DHL's server.
+	// Read this block about sufficient access rights for saving files to your server directory:
+	define('_SAVE_REQUEST_TO_FILE_', TRUE);
+		// All DHL requests can be saved to a subdirectory called "api_request".
+		// This helps you checking the contents of a request e.g. if it have failed (etc.)
+		// Remember that the requests contain personal customer data and should be cleaned after a certain time
+	define( '_USE_LOCAL_WSDL_', TRUE); 		
+		// DHL requests their users not to load the WSDL file every time creating or validating a label because of traffic reasons.
+		// Instead they ask for saving the WSDL to a local directory and refreshing it only if needed.
+		// Setting the value to TRUE means that the WSDL file is loaded only once every day.
+		// This will not work if you are not allowed to save files to your server directory. 
+		// In this case choose "FALSE" for loading WSDL from DHL's server.
+
+	// DHL CREDENTIALS SETUP
+
+	if (_WORKING_MODE_ == "SANDBOX") {
+		$user 			= '2222222222_01';					// SANDBOX-USER for GKS 
+		$signature 		= 'pass';							// SANDBOX-PASS for GKS
+		$ekp 			= '2222222222';						// DHL Kunden- bzw. Abrechnungsnummer
+	} else {
+		$user 			= 'Your LIVE-USER';					// LIVE-USER for GKS 
+		$signature 		= 'Your LIVE-PASS';					// LIVE-PASS for GKS
+		$ekp 			= 'Your EKP-NUMBER';				// DHL Kunden- bzw. Abrechnungsnummer
+	}
+	$log 			= TRUE;		// Set it to FALSE after you are shure that production mode is working fine
+	$teilnahme 		= "01";		// Teilnahme-Nummer: I.d.R. "01"
+								//
+								// Info zu Teilnahme-Nummer / Verfahren / Kundennr.
+								// --------------------------------------------------
+								// Teilnahme-Nummer: Wird vom DHL Vertrieb bei der Anmeldung im Geschäftskundenportal automatisch 
+								// vergeben. Zu finden in den letzten beiden Stellen der Abrechnungsnummer im GK-Portal unter Menü
+								// Vertragsdaten / Vertragspositionen => Abrechnungsnummer/Produkt.
+								// Hier ist z.B ein Paket National eingerichtet und ein Paket International, beide mit gleicher Abrechnungsnummer. 
+								//
+								// INFO: 	Die beiden Stellen davor bezeichnen das Verfahren. 
+								// 			Noch weiter davor steht die DHL Kundennr.
+
 
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	// DEFINES 2 (don't change)
@@ -93,34 +127,18 @@
 	define( '_DHL_API_DIR_', 'cig-wsdls/com/dpdhl/wsdl/geschaeftskundenversand-api/'._DHL_WSDL_VERSION_.'/');
 	define( '_DHL_API_URL_', 'https://cig.dhl.de/' . _DHL_API_DIR_ . _DHL_API_FILE_ );
 
+	if (_WORKING_MODE_ == "SANDBOX") {
+		$api_user  		= _DHL_Entwickler_ID_; 		// SANDBOX/LIVE-Switch  [_DHL_Entwickler_ID_ / _DHL_APP_ID_]
+		$api_password  	= _DHL_WebSitePass_;		// SANDBOX/LIVE-Switch  [_DHL_WebSitePass_ / _DHL_TOKEN_]
+	} else {
+		$api_user  		= _DHL_APP_ID_;
+		$api_password  	= _DHL_TOKEN_;
+	}
+
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	// Start data setup
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------		
 
-	// ...........................................................................................................................
-	// DHL CREDENTIALS SETUP
-	$user 			= '2222222222_01';					// SANDBOX-USER for GKS 
-	$signature 		= 'pass';							// SANDBOX
-	$ekp 			= '2222222222';						// DHL Kunden- bzw. Abrechnungsnummer
-	$api_user  		= _DHL_Entwickler_ID_; 	
-	$api_password  	= DHL_WebSitePass;		
-	$log 			= true;
-	$teilnahme 		= "01";		// Teilnahme-Nummer: I.d.R. "01"
-								//
-								// Info zu Teilnahme-Nummer / Verfahren / Kundennr.
-								// --------------------------------------------------
-								// Teilnahme-Nummer: Wird vom DHL Vertrieb bei der Anmeldung im Geschäftskundenportal automatisch 
-								// vergeben. Zu finden in den letzten beiden Stellen der Abrechnungsnummer im GK-Portal unter Menü
-								// Vertragsdaten / Vertragspositionen => Abrechnungsnummer/Produkt.
-								// Hier ist z.B ein Paket National eingerichtet und ein Paket International, beide mit gleicher Abrechnungsnummer. 
-								//
-								// INFO: 	Die beiden Stellen davor bezeichnen das Verfahren. 
-								// 			Noch weiter davor steht die DHL Kundennr.
-								//
-								// !!! ACHTUNG: Sie können nur die hier für Sie eingerichteten Verfahren nutzen !!!
-								// => siehe auch dafür weiter unten: getDHL_VerfahrenFilter()
-								// --------------------------------------------------
-								
 if (count($_POST) == 0) {
 
 	// ...........................................................................................................................
@@ -140,6 +158,7 @@ if (count($_POST) == 0) {
 	$my_contact_person  = "Responsible person's name";
 	$my_use_of_leitcodierung = FALSE; 					// DHL contractor makes use of DHL Leitcodierung
 	$my_costCentre		= "";							// your department, e.g. "Sales"
+	$my_reference		= ""; 							// your reference
 
 	// ...........................................................................................................................
 	// 1. EXAMPLE CUSTOMER SETUP (NATIONAL)
@@ -347,10 +366,10 @@ if (count($_POST) == 0) {
 	$parcel = new DHLParcel();
 	
 		//call these methods only once for this object
-		$parcel->setWorkingMode("SANDBOX", _USE_LOCAL_WSDL_, TRUE); // 1.SANDBOX/LIVE, 2. TRUE/FALSE: use an own WSDL-File from your server / 3. TRUE/FALSE: store Requests to server
+		$parcel->setWorkingMode(_WORKING_MODE_, _USE_LOCAL_WSDL_, _SAVE_REQUEST_TO_FILE_, ""); // 1.SANDBOX/LIVE, 2. TRUE/FALSE: use an own WSDL-File from your server / 3. TRUE/FALSE: store requests to server / 4. (Optional) prefix for request filename
 		$parcel->setApiLocation(_DHL_API_FILE_, _DHL_API_URL_);
 		$parcel->addCredentials($user, $signature, $ekp, $api_user, $api_password, $teilnahme);
-		$parcel->addCompany($my_use_of_leitcodierung, $my_company_name1, $my_company_name2, $my_company_name3, $my_street_name, $my_street_number, $my_zip, $my_city, $my_country, $my_countryISOCode, $my_email, $my_phone, $my_internet, $my_contact_person);
+		$parcel->addCompany($my_use_of_leitcodierung, $my_company_name1, $my_company_name2, $my_company_name3, $my_street_name, $my_street_number, $my_zip, $my_city, $my_country, $my_countryISOCode, $my_email, $my_phone, $my_internet, $my_contact_person, $my_reference);
 		
 		// call these methods for each customer / shipment
 		// 1. setup for a national receiver

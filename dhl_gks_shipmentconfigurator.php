@@ -6,6 +6,8 @@
 //  				- Function expanded: setWorkingMode: 
 //								3.Parameter = storing a request file 
 //								4.Parameter = optional user-id in request Filename
+//	
+//  - 06.05.2021:	- Methode addCompany(): new optional param $reference added (ShipperReference)
 // ***************************************************************************************
 
 require_once('dhl_gks_labelcreator.php');
@@ -146,7 +148,7 @@ class DHLParcel {
 	// ----------------------------------------------------------
 	// add your company info
 	// ----------------------------------------------------------
-	public function addCompany($useDHLLeitcodierung, $company_name1, $company_name2, $company_name3, $street_name, $street_number, $zip, $city, $country, $countryISOCode, $email, $phone, $internet, $contactPerson) {
+	public function addCompany($useDHLLeitcodierung, $company_name1, $company_name2, $company_name3, $street_name, $street_number, $zip, $city, $country, $countryISOCode, $email, $phone, $internet, $contactPerson, $reference="") {
 		if ($phone[0] == "+")
 			$phone = "+" . trim(preg_replace('![^0-9]!', '', $phone));
 		else 
@@ -166,7 +168,8 @@ class DHLParcel {
 			'email'           				=> trim($email),
 			'phone'           				=> $phone,
 			'internet'        				=> trim($internet),
-			'contactPerson'  				=> trim($contactPerson)
+			'contactPerson'  				=> trim($contactPerson),
+			'reference'						=> trim($reference)
 		);
 		$this->validSetup["company"] = TRUE;
 	}
@@ -281,14 +284,14 @@ class DHLParcel {
 	public function addExport($invoiceNumber, $exportType, $exportTypeDescription, $termsOfTrade, $placeOfCommital, $additionalFee, $permitNumber, 
 							  $attestationNumber, $WithElectronicExportNtfctn, $exportArticles, $bindNo) {
 		$export = array (
-			'invoiceNumber' 				=> $invoiceNumber,						// your customer's invoice no.
+			'invoiceNumber' 				=> trim($invoiceNumber),				// your customer's invoice no.
 			'exportType'					=> trim($exportType),					// see dhl's CN23 form
-			'exportTypeDescription'			=> $exportTypeDescription,				// very short article type description
-			'termsOfTrade'					=> $termsOfTrade,						// not required at postal customs clearing (BPI)
-			'placeOfCommital'				=> $placeOfCommital,					// zip + city + country: where parcel is handed over to some DHL shop
-			'additionalFee'					=> $additionalFee,						// additional customs fee
-			'permitNumber'					=> $permitNumber,						// customs permission number (articles > 1000 € : you have to declare the shipment to customs before shipping)
-			'attestationNumber'				=> $attestationNumber,					// customs certificate number (articles > 1000 € : you have to declare the shipment to customs before shipping)
+			'exportTypeDescription'			=> trim($exportTypeDescription),		// very short article type description
+			'termsOfTrade'					=> trim($termsOfTrade),					// not required at postal customs clearing (BPI)
+			'placeOfCommital'				=> trim($placeOfCommital),				// zip + city + country: where parcel is handed over to some DHL shop
+			'additionalFee'					=> trim($additionalFee),				// additional customs fee
+			'permitNumber'					=> trim($permitNumber),					// customs permission number (articles > 1000 € : you have to declare the shipment to customs before shipping)
+			'attestationNumber'				=> trim($attestationNumber),			// customs certificate number (articles > 1000 € : you have to declare the shipment to customs before shipping)
 			'WithElectronicExportNtfctn active' 	
 											=> (bool)$WithElectronicExportNtfctn,	// true / false: TRUE if shipment/export is communicated electronically to customs authorities
 			'exportArticles'				=> $exportArticles,						// array() : list of exportArticles
@@ -306,12 +309,12 @@ class DHLParcel {
 	// ----------------------------------------------------------
 	public function getFormattedExportArticle($name, $weight, $price, $tariff, $amount, $origin) {
 		return array(
-			'description' 			=> $name, 
-			'countryCodeOrigin'		=> $origin,
-			'customsTariffNumber'	=> $tariff, 
-			'amount'				=> $amount, 
-			'weightInKG'			=> $weight, 
-			'customsValue'			=> $price
+			'description' 			=> trim($name),
+			'weightInKG'			=> trim($weight),
+			'customsValue'			=> trim($price),
+			'customsTariffNumber'	=> trim($tariff),
+			'amount'				=> trim($amount),
+			'countryCodeOrigin'		=> trim($origin)
 		);
 	}
 	// ----------------------------------------------------------
