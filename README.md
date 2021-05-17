@@ -67,7 +67,7 @@ e) Das Paketobjekt wird erzeugt mit
 	  
 f) Um dhl_gks_setup.php im Sandbox-Mode laufen zu lassen, nutzen Sie den Sandbox-Switch
 
-			$parcel->setWorkingMode("SANDBOX", ...
+			define( '_WORKING_MODE_', 'SANDBOX');	  // Change this from 'SANDBOX' to 'LIVE' for production mode
         
    ... sonst kann das Feld leer gelassen oder mit anderem Inhalt z.B. "LIVE" übergeben werden
 		
