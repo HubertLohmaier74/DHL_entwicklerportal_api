@@ -1,4 +1,4 @@
-# Going LIVE - HowTo
+# DHL Geschäftskundenversand: Going LIVE - HowTo
 
 1. https://entwickler.dhl.de/group/ep/myapps
 Hier muss unter "Meine Applikationen" in der Zeile Ihrer verwendeten APP der Status "Freigabe erteilt" stehen. Tut er das?
