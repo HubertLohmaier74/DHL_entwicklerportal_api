@@ -18,6 +18,7 @@
 //	- 23.04.2021: Receiver notification only possible if email address not empty
 //	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with  street_name
 //  - 06.05.2021: 'ShipperReference' in Request aufgenommen (Company-Reference)
+//  - 08.07.2021: Kleiner Bug behoben, der bei abgelaufenem GKS-Passwort auftrat
 // ***************************************************************************************
 class DHLBusinessShipment {
 
@@ -615,11 +616,13 @@ class DHLBusinessShipment {
 			$this->addError($e->faultstring); 				// faultstring = soap intern
 			return array("ERR" => "SOAP ERROR");
 		}
-		
+
 		if ( $response->Status->statusCode != 0 ) {
 			$this->addError($response->Status->statusText);
-			foreach ($response->ValidationState->Status->statusMessage AS $message)
-				$this->addError($message);
+			if ( is_array($response->ValidationState->Status->statusMessage) ) { // 08.07.2021: check if array does exist
+				foreach ($response->ValidationState->Status->statusMessage AS $message)
+					$this->addError($message);
+			}
 			return array("ERR" => "VALIDATION ERROR");
 
 		} else { // ... AFTER SUCCESSFUL VALIDATION... 
