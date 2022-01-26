@@ -18,6 +18,7 @@ Der Wrapper wird noch weiterentwickelt. Im Moment kann er folgende Labels erzeug
 				- PAKET INTERNATIONAL (for within EU destinations without customs doc creation)
 				- WARENPOST NATIONAL
 				- EUROPAKET (= B2B Shipment)
+				- DHL WARENPOST INTERNATIONAL
 
 Ausserdem können erzeugte Labels storniert werden.
 
@@ -127,7 +128,7 @@ In der aktuellen Version sind nicht für alle DHL Services Optionen vorhanden.
 Z.B. Höherversicherung oder Altersprüfungen müssten selbst bzw. auf Anfrage noch umgesetzt werden.
 
 -------------------------------------------------------------------
-NEU
+NEU 1
 -------------------------------------------------------------------
 1. Für internationale Pakete kann jetzt gewählt werden, ob Premium verschickt werden soll oder nicht.
 2. Ausserdem kann nun gewählt werden, ob der Empfänger benachrichtigt werden soll oder nicht. (Dazu muss eine Mailadresse des Empfängers vorhanden sein.
@@ -135,6 +136,16 @@ NEU
 4. Der erzeugte Request kann gespeichert werden. Dazu erhielt die Funktion setWorkingMode() 2 zusätzliche (optionale) Parameter
 
 		- $parcel->setWorkingMode(... , ... , TRUE, "USER PREFIX FOR FILENAME OR LEAVE IT EMPTY");
+
+-------------------------------------------------------------------
+NEU 2
+-------------------------------------------------------------------
+Das Produkt V66WPI (DHL WARENPOST INTERNATIONAL) wurde hinzugefügt.
+Um zu unterscheiden, ob das Produkt innerhalb oder ausserhalb der EU
+verschickt werden soll, reicht es die zu verzollenden Arikel anzugeben,
+oder wegzulassen. (Falls eine NICHT-EU Sendung ohne zu verzollende Artikel
+gelabelt werden soll, wird von DHL eine Fehlermeldung generiert und kein
+Etikett erstellt.)
 
 -------------------------------------------------------------------
 # ENDE
