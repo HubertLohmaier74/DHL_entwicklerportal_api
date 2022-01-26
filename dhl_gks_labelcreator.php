@@ -16,9 +16,10 @@
 //  (c) Hubert Lohmaier, 13.04.2021
 //
 //	- 23.04.2021: Receiver notification only possible if email address not empty
-//	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with  street_name
-//  - 06.05.2021: 'ShipperReference' in Request aufgenommen (Company-Reference)
-//  - 08.07.2021: Kleiner Bug behoben, der bei abgelaufenem GKS-Passwort auftrat
+//	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with: street_name
+//  - 06.05.2021: 'ShipperReference' added to request (Company-Reference)
+//  - 08.07.2021: Small bug eliminated that showed out every time when GKS-pass was outdated
+//  - 26.01.2022: New product V66WPI added (DHL Warenpost International)
 // ***************************************************************************************
 class DHLBusinessShipment {
 
@@ -330,6 +331,12 @@ class DHLBusinessShipment {
 							if ( $myShipment['Endorsement active'] != "" ) 								// how to handle parcel if receiver not met
 								$sd['Service']['Endorsement'] = array("active"=>TRUE, "type" => $myShipment['Endorsement active']);
 							break;
+							
+			case "V66WPI" : // DHL WARENPOST INTERNATIONAL
+							$sd['Service']['Premium active'] = $myShipment['Premium active']; 			// true / false: Premium shipment
+							if ( $myShipment['Endorsement active'] != "" ) 								// how to handle parcel if receiver not met
+								$sd['Service']['Endorsement'] = array("active"=>TRUE, "type" => $myShipment['Endorsement active']);
+							break;
 		}
 
 		if ( $myCustomer['notification'] && $myCustomer[email] != "") // 23.04.2021
@@ -371,10 +378,10 @@ class DHLBusinessShipment {
 
 		// Company's contact
 		$shipper['Communication']                  	= array();
-		$shipper['Communication']['!--Optional:--']	= "";
+//		$shipper['Communication']['!--Optional:--']	= "";
 		$shipper['Communication']['phone']         	= $this->company['phone'];
 		$shipper['Communication']['email']         	= $this->company['email'];
-		$shipper['Communication']['!--Optional:--']	= "";
+//		$shipper['Communication']['!--Optional:--']	= "";
 		$shipper['Communication']['contactPerson'] 	= $this->company['contactPerson'];
 
 		// .........
@@ -467,6 +474,7 @@ class DHLBusinessShipment {
 				} // switch (dhl_receiver)
 			break; // end V01PAK
 				
+			case "V66WPI"	:
 			case "V53WPAK"	:
 			case "V54EPAK"	:
 						$receiver['Address'] = array();
@@ -500,8 +508,8 @@ class DHLBusinessShipment {
 		$shipment['ShipmentOrder']['Shipment']['Receiver'] = $receiver;
 		// .........
 
-		// export documents for internatonal parcels
-		if ( $myShipment['product'] == "V53WPAK") {
+		// export documents for international parcels
+		if ( $myShipment['product'] == "V53WPAK" || $myShipment['product'] == "V66WPI") {
 			$export = array();
 			$export['invoiceNumber'] 			= $myExport['invoiceNumber'];			// customers invoice number
 			$export['exportType']				= $myExport['exportType'];				// see dhl's CN23 form
@@ -515,19 +523,22 @@ class DHLBusinessShipment {
 
 			$exportDoc = array();									// Listing of all articles exported follows
 			$cnt = 0;
-			foreach ($myExport['exportArticles'] AS $exportArticle) {					// iterate through all articles		
-				$exportDoc['ExportDocPosition'][$cnt]['description']			= $exportArticle['description'];			// detailed short description (e.g. author/title of book)
-				$exportDoc['ExportDocPosition'][$cnt]['countryCodeOrigin']		= $exportArticle['countryCodeOrigin']; 		// where article has been produced: empty if not known for shure
-				$exportDoc['ExportDocPosition'][$cnt]['customsTariffNumber'] 	= $exportArticle['customsTariffNumber'];	// customs article no =Zolltarifnummer (https://www.zolltarifnummern.de/)
-				$exportDoc['ExportDocPosition'][$cnt]['amount'] 				= $exportArticle['amount'];					// how many items of this article
-				$exportDoc['ExportDocPosition'][$cnt]['netWeightInKG'] 			= $exportArticle['weightInKG'];				// weight of 1 item
-				$exportDoc['ExportDocPosition'][$cnt]['customsValue']			= $exportArticle['customsValue'];			// price of 1 item
-				$cnt++;
-			}
+			if (count($myExport['exportArticles']) > 0) {
+				foreach ($myExport['exportArticles'] AS $exportArticle) {					// iterate through all articles		
+					$exportDoc['ExportDocPosition'][$cnt]['description']			= $exportArticle['description'];			// detailed short description (e.g. author/title of book)
+					$exportDoc['ExportDocPosition'][$cnt]['countryCodeOrigin']		= $exportArticle['countryCodeOrigin']; 		// where article has been produced: empty if not known for shure
+					$exportDoc['ExportDocPosition'][$cnt]['customsTariffNumber'] 	= $exportArticle['customsTariffNumber'];	// customs article no =Zolltarifnummer (https://www.zolltarifnummern.de/)
+					$exportDoc['ExportDocPosition'][$cnt]['amount'] 				= $exportArticle['amount'];					// how many items of this article
+					$exportDoc['ExportDocPosition'][$cnt]['netWeightInKG'] 			= $exportArticle['weightInKG'];				// weight of 1 item
+					$exportDoc['ExportDocPosition'][$cnt]['customsValue']			= $exportArticle['customsValue'];			// price of 1 item
+					$cnt++;
+				}
 
-			// .........
-			$shipment['ShipmentOrder']['Shipment']['ExportDocument'] = array_merge ( $export , $exportDoc );
-			// .........
+				// ......... If you have a V66WPI to Europe, just do not add export articles in article setup => in this case no customs section will be added here
+				//           (For V53WPAK leaving export articles section empty will cause an DHL error message)
+				$shipment['ShipmentOrder']['Shipment']['ExportDocument'] = array_merge ( $export , $exportDoc );
+				// .........
+			}
 		}
 
 		// Leitcodierung
@@ -609,7 +620,8 @@ class DHLBusinessShipment {
 		// ........................................................
 		try {
 			$response = $this->client->ValidateShipment ( $shipmentRequest );
-			if ($this->responseFile != "") 
+//			if ($this->responseFile != "") 
+			if (property_exists($this, "responseFile") && $this->responseFile != "")
 				$stored = $this->storeResponseFile($response, "VALIDATE");
 
 		} catch (Exception $e) {
@@ -630,7 +642,8 @@ class DHLBusinessShipment {
 			// 2. CREATE LABEL
 			// ........................................................
 			$response = $this->client->createShipmentOrder( $shipmentRequest );
-			if ($this->responseFile != "") 
+//			if ($this->responseFile != "") 
+			if (property_exists($this, "responseFile") && $this->responseFile != "")
 				$stored = $this->storeResponseFile($response, "CREATE");
 
 			if ( is_soap_fault( $response ) || $response->Status->statusCode != 0 ) {

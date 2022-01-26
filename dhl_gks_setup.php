@@ -25,6 +25,13 @@
 	// ..                                                                                      ..
 	// .. 17.05. Some syntax / content cleaning for easier use                                 ..
 	// ..                                                                                      ..
+	// .. 26.01.2022                                                                           ..
+	// .. 26.01. DHL WARENPOST INTERNATIONAL added (V66WPI)	                                   ..
+	// .. (EU/NOT-EU: DHL does not have separate products for WARENPOST INTERNATIONAL as they  ..
+	// ..  have with Parcel EU / Parcel International. So if you send to EU just do not add    ..
+	// ..  export articles to the customs section. Anyway leaving this section empty for a     ..
+	// ..  shipment outside EU results in a DHL error message.=                                ..
+	// ..                                                                                      ..
 	// ..........................................................................................
 	
 
@@ -59,6 +66,8 @@
 	//				- WARENPOST NATIONAL
 	//				- EUROPAKET (= B2B Shipment)
 	// (PAKET NATIONAL to PARCELSHOP is prepared but for some reasons it fails. I didn't have time yet to investigate this issue.)
+	//              - DHL WARENPOST INTERNATIONAL (for inside & outside EU) 
+	//                 => !! ATTENTION: This is not the German Post "Warenpost International" tariff. They also offer this product on small labels !!
 	
 	
 	
@@ -73,26 +82,28 @@
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	define( '_WORKING_MODE_', 'SANDBOX');							// Change this from 'SANDBOX' to 'LIVE' for production mode
 	
-	define( '_DHL_Entwickler_ID_', 'Your DHL Entwickler-ID');		// SANDBOX-USER
+	define( '_DHL_Entwickler_ID_', 'Your SANDBOX user-ID: look for it in your entwickler.dhl.de account');		// SANDBOX-USER
 	define( '_DHL_APP_ID_', 'Your APP ID');							// LIVE-USER
 
-	define( '_DHL_WebSitePass_', 'Your DHL Entwickler-Website-Pass');		// SANDBOX-PASS
-	define( '_DHL_TOKEN_', 'Your Token');									// LIVE-PASS
+	define( '_DHL_WebSitePass_', 'Your SANDBOX pass = pass for entwickler.dhl.de account');		// SANDBOX-PASS
+	define( '_DHL_TOKEN_', 'Your Token');							// LIVE-PASS
 
 	// Read this block about sufficient access rights for saving files to your server directory:
 	define('_SAVE_REQUEST_TO_FILE_', TRUE);
 		// All DHL requests can be saved to a subdirectory called "api_request".
-		// This helps you checking the contents of a request e.g. if it have failed (etc.)
-		// Remember that the requests contain personal customer data and should be cleaned after a certain time
+		// This helps you checking the contents of a request e.g. if it has failed (etc.)
+		// (Remember that the requests contain personal customer data and should be cleaned after a certain time)
+		// This will not work if you are not allowed to save files to your server directory. 
+		// In this case set it to "FALSE".
 	define( '_USE_LOCAL_WSDL_', TRUE); 		
-		// DHL requests their users not to load the WSDL file every time creating or validating a label because of traffic reasons.
+		// DHL asks their users not to load the WSDL file every time creating or validating a label because of traffic reasons.
 		// Instead they ask for saving the WSDL to a local directory and refreshing it only if needed.
 		// Setting the value to TRUE means that the WSDL file is loaded only once every day.
 		// This will not work if you are not allowed to save files to your server directory. 
 		// In this case choose "FALSE" for loading WSDL from DHL's server.
 
-	// DHL CREDENTIALS SETUP
 
+	// DHL CREDENTIALS SETUP
 	if (_WORKING_MODE_ == "SANDBOX") {
 		$user 			= '2222222222_01';					// SANDBOX-USER for GKS 
 		$signature 		= 'pass';							// SANDBOX-PASS for GKS
@@ -331,9 +342,54 @@ if (count($_POST) == 0) {
 	$pa_notifyCustomer	= TRUE;							// TRUE/FALSE: allow DHL to send tracking information to your customer
 */
 
+	// ...........................................................................................................................
+	// 8. EXAMPLE CUSTOMER SETUP (WARENPOST INTERNATIONAL for outside EU)
+	$wi_reference	   	= "88888"; 		// unified identification number (e.g. order number), used for: 1) binding customer and shipment / 2) shows up on DHL label
+	$wi_product			= "V66WPI";		// DHL product name
+	$wi_verfahren		= "66";			// DHL Verfahren (procedure)
+	$wi_premium			= TRUE;			// DHL premium services 
+	$wi_exportType		= "";			// not needed for national shipments
+	$wi_name1 			= "Rudi Beisl";
+	$wi_name2          	= "";
+	$wi_name3			= "";
+	$wi_zip           	= "8045";
+	$wi_street_name   	= "Uetlibergstrasse";
+	$wi_street_number 	= "132";
+	$wi_city          	= "Zürich";
+	$wi_province		= "";
+	$wi_country       	= "Schweiz";
+	$wi_countryISOCode 	= "CH";							// country converted into ISO code. Also see e.g. https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
+	$wi_state			= "";				// not used for NATIONAL
+	$wi_email			= "Rudi.Beisl@myemail.ch";
+	$wi_phone			= "00341543210";
+	$wi_notifyCustomer	= TRUE;							// TRUE/FALSE: allow DHL to send tracking information to your customer
+	$wi_endorsement		= "ABANDONMENT";
+
+	// 9. EXAMPLE CUSTOMER SETUP (WARENPOST INTERNATIONAL for inside EU)
+	$wo_reference	   	= "99999"; 		// unified identification number (e.g. order number), used for: 1) binding customer and shipment / 2) shows up on DHL label
+	$wo_product			= "V66WPI";		// DHL product name
+	$wo_verfahren		= "66";			// DHL Verfahren (procedure)
+	$wo_premium			= FALSE;		// DHL premium services 
+	$wo_exportType		= "";			// not needed for national shipments
+	$wo_name1 			= "Rudi Beisl";
+	$wo_name2          	= "";
+	$wo_name3			= "";
+	$wo_zip           	= "1050";
+	$wo_street_name   	= "Wiedner Hauptstraße";
+	$wo_street_number 	= "88";
+	$wo_city          	= "Wien";
+	$wo_province		= "";
+	$wo_country       	= "Österreich";
+	$wo_countryISOCode 	= "AT";							// country converted into ISO code. Also see e.g. https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
+	$wo_state			= "";				// not used for NATIONAL
+	$wo_email			= "Rudi.Beisl@myemail.ch";
+	$wo_phone			= "00341543210";
+	$wo_notifyCustomer	= TRUE;							// TRUE/FALSE: allow DHL to send tracking information to your customer
+
 
 	// ...........................................................................................................................
 	// ARTICLE SETUP FOR INTERNATIONAL SHIPMENT (EXPORT)
+	// ...........................................................................................................................
 	// 
 	// for german customs tariff numbers see: https://www.zolltarifnummern.de/
 	// ...........................................................................................................................
@@ -352,10 +408,17 @@ if (count($_POST) == 0) {
 	$article_2_amount 	= "2";							// 1 oder more articles of the same name, price and type
 	$article_2_origin 	= "DE";							// producing country (ISO-3 Code)
 
+	$article_3_name 	= "Something";		// article's identification name (a short description in detail)
+	$article_3_weight 	= "0.8"; 						// article's NETTO weight in KG without packaging
+	$article_3_price 	= "39.99";						// article's price (of 1 item)
+	$article_3_tariff 	= "49019900";					// customs tariff number (points will be removed later)
+	$article_3_amount 	= "1";							// 1 oder more articles of the same name, price and type
+	$article_3_origin 	= "DE";							// producing country (ISO-3 Code)
+
 	// ...........................................................................................................................
 	// Only for example purpose: you have to submit these values for each shipment separately.
 	// Below i will use these over and over again...
-	$weightInKG	= "0.6";							// parcel's weight incl. packaging (!! You get an error if this weight is less than the weight of all exported articles !!)
+	$weightInKG	= "1";								// parcel's weight incl. packaging (!! You get an error if this weight is less than the weight of all exported articles !!)
 	$lengthInCM	= "";								// optional: needed if exceeds default values
 	$widthInCM 	= "";								// optional: needed if exceeds default values
 	$heightInCM	= ""; 								// optional: needed if exceeds default values
@@ -387,7 +450,7 @@ if (count($_POST) == 0) {
 		// 3. setup example for an international receiver
 		// .....................................
 		$bindNo = $parcel->addCustomer($i_reference, $i_name1, $i_name2, $i_name3, $i_street_name, $i_street_number, $i_zip, $i_city, $i_province, $i_country, $i_countryISOCode, $i_state, $i_notifyCustomer, $i_email, $i_phone);
-		$parcel->addShipment($i_reference, $i_premium, $i_product, $i_verfahren, $my_costCentre, $weightInKG, $lengthInCM, $widthInCM, $heightInCM, $bindNo, $i_endorsement);
+		$parcel->addShipment($i_reference, $i_premium, $i_product, $i_verfahren, $my_costCentre, $weightInKG, $lengthInCM, $widthInCM, $heightInCM, $bindNo, $i_endorsement); // !! additional parm $i_endorsement for handling parcels that cannot be delivered !!
 		// Making a list of exportArticles
 		$exportArticles = array();
 		// foreach of your articles shipped to this customer: {
@@ -414,6 +477,22 @@ if (count($_POST) == 0) {
 		$bindNo = $parcel->addCustomer($pa_reference, $pa_name1, $pa_name2, $pa_name3, $pa_street_name, $pa_street_number, $pa_zip, $pa_city, $pa_province, $pa_country, $pa_countryISOCode, $pa_state, $pa_notifyCustomer, $pa_email, $pa_phone, "PARCELSHOP");
 		$parcel->addShipment($pa_reference, $pa_premium, $pa_product, $pa_verfahren, $my_costCentre, $weightInKG, $lengthInCM, $widthInCM, $heightInCM, $bindNo);
 */
+		// 8. setup example for WARENPOST INTERNATIONAL to outside EU
+		$bindNo = $parcel->addCustomer($wi_reference, $wi_name1, $wi_name2, $wi_name3, $wi_street_name, $wi_street_number, $wi_zip, $wi_city, $wi_province, $wi_country, $wi_countryISOCode, $wi_state, $wi_notifyCustomer, $wi_email, $wi_phone);
+		$parcel->addShipment($wi_reference, $wi_premium, $wi_product, $wi_verfahren, $my_costCentre, $weightInKG, $lengthInCM, $widthInCM, $heightInCM, $bindNo, $wi_endorsement); // !! additional parm $i_endorsement for handling parcels that cannot be delivered !!
+		// Making a list of exportArticles
+		unset($exportArticles);
+		$exportArticles = array();
+		// foreach of your articles shipped to this customer: {
+			$exportArticles[] = $parcel->getFormattedExportArticle($article_3_name, $article_3_weight, $article_3_price, $article_3_tariff, $article_3_amount, $article_3_origin);
+		// }
+		$parcel->addExport($i_invoiceNumber, $i_exportType, $i_exportTypeDescription, $i_termsOfTrade, $i_placeOfCommital, $i_additionalFee, $i_permitNumber, $i_attestationNumber, $i_WithElectronicExportNtfctn, $exportArticles, $bindNo);
+
+		// 9. setup example for WARENPOST INTERNATIONAL to outside EU (no customs)
+		$bindNo = $parcel->addCustomer($wo_reference, $wo_name1, $wo_name2, $wo_name3, $wo_street_name, $wo_street_number, $wo_zip, $wo_city, $wo_province, $wo_country, $wo_countryISOCode, $wo_state, $wo_notifyCustomer, $wo_email, $wo_phone);
+		$parcel->addShipment($wo_reference, $wo_premium, $wo_product, $wo_verfahren, $my_costCentre, $weightInKG, $lengthInCM, $widthInCM, $heightInCM, $bindNo);
+
+
 		// CREATE ALL LABELS !!
 		$response = $parcel->createLabels();
 
@@ -429,6 +508,7 @@ if (count($_POST) == 0) {
 	$labelCnt = 1;
 	$bAtLeastOneSuccess=FALSE;
 	echo "<h3>YOUR LABELS:</h3>"; 
+	echo "<br>Mode / Credentials: " . _WORKING_MODE_ . " / " . $api_user. " / " . $api_password;
 	echo "<pre>";
 	echo "<form action='dhl_gks_setup.php' method='post'>";
 	foreach ($response AS $r) {
