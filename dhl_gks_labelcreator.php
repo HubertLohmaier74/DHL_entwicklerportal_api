@@ -305,7 +305,7 @@ class DHLBusinessShipment {
 		// Shipment Details
 		// .........
 		$sd                 	= array();
-		$sd['product']  		= $myShipment[product];
+		$sd['product']  		= $myShipment['product'];
 		$sd['accountNumber']	= $this->credentials['ekp'] . $myShipment['verfahren'] . $this->credentials['teilnahme'];
 		$sd['customerReference']= $myCustomer['customerReference'];
 		$sd['shipmentDate'] 	= $myShipment['shipmentDate'];
@@ -339,7 +339,7 @@ class DHLBusinessShipment {
 							break;
 		}
 
-		if ( $myCustomer['notification'] && $myCustomer[email] != "") // 23.04.2021
+		if ( $myCustomer['notification'] && $myCustomer['email'] != "") // 23.04.2021
 			$sd['Notification']['recipientEmailAddress'] = $myCustomer['email'];
 		else
 			$sd['Notification']['recipientEmailAddress'] = "";
