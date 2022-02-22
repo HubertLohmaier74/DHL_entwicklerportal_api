@@ -16,10 +16,13 @@
 //  (c) Hubert Lohmaier, 13.04.2021
 //
 //	- 23.04.2021: Receiver notification only possible if email address not empty
-//	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with: street_name
-//  - 06.05.2021: 'ShipperReference' added to request (Company-Reference)
-//  - 08.07.2021: Small bug eliminated that showed out every time when GKS-pass was outdated
+//	- 26.04.2021: DHL-API Update from 08.04.2021 => Street-No. got optional field, can be given over together with  street_name
+//  - 06.05.2021: Soap item 'ShipperReference' added to request (= Company-Reference)
+//  - 08.07.2021: Small bug eliminated that showed up every time when GKS-pass was outdated
 //  - 26.01.2022: New product V66WPI added (DHL Warenpost International)
+//  - 22.02.2022: Bug eliminated that prevented "Premium Service" beeing switched on/off
+//  - 22.02.2022: Bug eliminated relating all soap items with "[... active']" extension (= WithElectronicExportNtfctn + PrintOnlyIfCodeable)
+//  - 22.02.2022: Some bugs eliminated that triggered warnings oder errors using PHP8
 // ***************************************************************************************
 class DHLBusinessShipment {
 
@@ -29,7 +32,6 @@ class DHLBusinessShipment {
 	private $client;
 	private $errors;
 	private $sandbox;
-//	public $WSDL;		26.04.
 	private $WSDL;
 
 	// --------------------------------------------------------
@@ -90,7 +92,7 @@ class DHLBusinessShipment {
 	// local WSDL is older than 24h ?
 	// 
 	// !!! WARNING:
-	// findLocalWSDL() has to be checked before or function will crash if file does not exist
+	// Method findLocalWSDL() has to be used before or function will crash if file does not exist
 	// --------------------------------------------------------
 	private function outdatedWSDL() {
 		$filename = $this->WSDL['directory'] . $this->WSDL['API_FILE'];
@@ -236,7 +238,6 @@ class DHLBusinessShipment {
 		);
 
 		$this->log( $auth_params );
-//		$this->client = new SoapClient( API_URL, $auth_params );
 		if ($this->WSDL['local']) {
 			$this->client = new SoapClient( $this->WSDL['directory'] . $this->WSDL['API_FILE'], $auth_params );
 		} else {
@@ -269,15 +270,6 @@ class DHLBusinessShipment {
 		}
 		
 		return $delete;
-	}
-
-
-	// --------------------------------------------------------
-	// Get an address block for a certain request depending on 
-	// which product and delivery target is chosen
-	// --------------------------------------------------------
-	public function getReceiverAddressBlock( $product, $dhl ) {
-		
 	}
 
 
@@ -323,18 +315,13 @@ class DHLBusinessShipment {
 							$sd['Service'] = "";
 							break;
 			case "V54EPAK" : // EU: always TRUE
-							$sd['Service']['Premium active'] = TRUE; 		// true / false: Premium shipment
+							$sd['Service']['Premium'] = array("active" => TRUE); 		// true / false: Premium shipment
 							break;
 
+			case "V66WPI"  : // DHL WARENPOST INTERNATIONAL
 			case "V53WPAK" : // INTERNATIONAL: TRUE or FALSE as you have chosen in your shipment setup
-							$sd['Service']['Premium active'] = $myShipment['Premium active']; 			// true / false: Premium shipment
-							if ( $myShipment['Endorsement active'] != "" ) 								// how to handle parcel if receiver not met
-								$sd['Service']['Endorsement'] = array("active"=>TRUE, "type" => $myShipment['Endorsement active']);
-							break;
-							
-			case "V66WPI" : // DHL WARENPOST INTERNATIONAL
-							$sd['Service']['Premium active'] = $myShipment['Premium active']; 			// true / false: Premium shipment
-							if ( $myShipment['Endorsement active'] != "" ) 								// how to handle parcel if receiver not met
+							$sd['Service']['Premium'] = array("active" => $myShipment['Premium active']);  	// true / false: Premium shipment
+							if ( $myShipment['Endorsement active'] != "" ) 									// how to handle parcel if receiver not met
 								$sd['Service']['Endorsement'] = array("active"=>TRUE, "type" => $myShipment['Endorsement active']);
 							break;
 		}
@@ -393,8 +380,6 @@ class DHLBusinessShipment {
 		// .........
 		$receiver = array();
 		$receiver['name1']							= $myCustomer['name1'];
-
-		
 
 		// Receiver's address
 		switch ( $myShipment['product'] ) {
@@ -519,7 +504,11 @@ class DHLBusinessShipment {
 			$export['additionalFee'] 			= $myExport['additionalFee'];			// shipping cost
 			$export['permitNumber']				= $myExport['permitNumber'];			// customs permission number (articles > 1000 € : you have to declare the shipment to customs before shipping)
 			$export['attestationNumber']		= $myExport['attestationNumber'];		// customs certificate number (articles > 1000 € : you have to declare the shipment to customs before shipping)
-			$export['WithElectronicExportNtfctn active'] = $myExport['WithElectronicExportNtfctn active'];	// true / false: if shipment/export is communicated electronically to customs authorities
+			//$export['WithElectronicExportNtfctn active'] = $myExport['WithElectronicExportNtfctn active'];	// true / false: if shipment/export is communicated electronically to customs authorities
+			if ($myExport['WithElectronicExportNtfctn active']) {
+				$export['WithElectronicExportNtfctn'] = array("active" => TRUE);
+			}
+			
 
 			$exportDoc = array();									// Listing of all articles exported follows
 			$cnt = 0;
@@ -542,7 +531,10 @@ class DHLBusinessShipment {
 		}
 
 		// Leitcodierung
-		$shipment['ShipmentOrder']['PrintOnlyIfCodeable active'] = $this->company['PrintOnlyIfCodeable active'];	// false (true = only if using Leitcodierung: https://www.dhl.de/de/geschaeftskunden/paket/information/geschaeftskunden/abrechnung/leitcodierung.html)
+		//$shipment['ShipmentOrder']['PrintOnlyIfCodeable active'] = $this->company['PrintOnlyIfCodeable active'];	// false (true = only if using Leitcodierung: https://www.dhl.de/de/geschaeftskunden/paket/information/geschaeftskunden/abrechnung/leitcodierung.html)
+		if ($this->company['PrintOnlyIfCodeable active']) {
+			$shipment['ShipmentOrder']['PrintOnlyIfCodeable'] = array("active" => TRUE);
+		}
 
 		return $shipment;
 		

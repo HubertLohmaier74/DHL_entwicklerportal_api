@@ -8,6 +8,7 @@
 //								4.Parameter = optional user-id in request Filename
 //	
 //  - 06.05.2021:	- Methode addCompany(): new optional param $reference added (ShipperReference)
+//  - 22.02.2022:	- Bug eliminated that was responsible for saving only the last api request-file to disk (now millseconds are included in filename)
 // ***************************************************************************************
 
 require_once('dhl_gks_labelcreator.php');
@@ -82,14 +83,18 @@ class DHLParcel {
 		$subdirectory = "/api_request";
 		$requestDir = __DIR__ . $subdirectory;
 		
+
 		// include USER-ID in Filename?
 		if ($this->userID != "") 
 			$userID = $this->userID . "_";
 		else $userID = "";
 				
-		// Filename setup
-		$requestFile = $requestDir . "/" . $userID . str_replace('.', date("Y-m-d H:i", time()).'.', $requestFile);
+		
 			
+				
+		// Filename setup
+		$now = DateTime::createFromFormat('U.u', microtime(true));
+		$requestFile = $requestDir . "/" . $userID . str_replace('.', $now->format("m-d-Y H:i:s.u") . '.', $requestFile);
 		if ($this->storeRequests) {
 
 			// Create DIR if it does not exist
@@ -269,7 +274,8 @@ class DHLParcel {
 			'bind'					=> (int)$bindNo,				// connects customer data to shipment data
 			'Endorsement active'	=> trim($endorsement),			// how to handle parcel if reveiver not met
 			'timestamp'				=> time(),						// timestamp
-			'shipmentDate'			=> date("Y-m-d")				// today
+			'shipmentDate'			=> date("Y-m-d"),				// today
+			'destination_type'		=> "DEFAULT"
 		);
 		// ..................................
 		$this->shipments[$bindNo] = $shipment;						// connects customer data to shipment data
@@ -299,6 +305,7 @@ class DHLParcel {
 		);
 		// ..................................
 		$this->export[$bindNo] = $export;											// connects customer data to export data
+		$this->shipments[$bindNo]['destination_type'] = "INTERNATIONAL+CUSTOMS";	// this international shipment contains declarable goods
 	}
 	// ----------------------------------------------------------
 
@@ -335,14 +342,13 @@ class DHLParcel {
 	
 
 	// ----------------------------------------------------------
-	// check if this shipment is INTERNATIONAL and binding element [IDX] does exist in export array
+	// check if this shipment is INTERNATIONAL. In this case an export element with fitting [IDX] needs to exist
 	// 
-	// (Export data is only needed if shipment destination_type == INTERNATIONAL. 
+	// (Export data is only needed if shipment destination_type == "INTERNATIONAL+CUSTOMS". 
 	// Otherwise always return TRUE.)
 	// ----------------------------------------------------------
 	private function export_exists($bind) {
-		
-		if ( strtoupper($this->shipment[$bind]['destination_type']) == "INTERNATIONAL") {
+		if ( (null !== $this->shipments[$bind]['destination_type']) && (strtoupper($this->shipments[$bind]['destination_type'] == "INTERNATIONAL+CUSTOMS")) ) {
 			if ( isset($this->export[$bind]) )
 				return TRUE;
 			else
@@ -360,7 +366,7 @@ class DHLParcel {
 	// 2. Company setup done?
 	// 3. At least one customer added?
 	// 4. To each customer there is a shipment available?
-	// 5. To each international shipment there are export data available?
+	// 5. To each international shipment there export data is available?
 	//
 	// return: TRUE / or Error message
 	// ----------------------------------------------------------

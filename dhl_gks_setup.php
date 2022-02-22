@@ -26,11 +26,7 @@
 	// .. 17.05. Some syntax / content cleaning for easier use                                 ..
 	// ..                                                                                      ..
 	// .. 26.01.2022                                                                           ..
-	// .. 26.01. DHL WARENPOST INTERNATIONAL added (V66WPI)	                                   ..
-	// .. (EU/NOT-EU: DHL does not have separate products for WARENPOST INTERNATIONAL as they  ..
-	// ..  have with Parcel EU / Parcel International. So if you send to EU just do not add    ..
-	// ..  export articles to the customs section. Anyway leaving this section empty for a     ..
-	// ..  shipment outside EU results in a DHL error message.=                                ..
+	// .. 26.01. WARENPOST INTERNATIONAL added (V66WPI)	                                       ..
 	// ..                                                                                      ..
 	// ..........................................................................................
 	
@@ -66,8 +62,6 @@
 	//				- WARENPOST NATIONAL
 	//				- EUROPAKET (= B2B Shipment)
 	// (PAKET NATIONAL to PARCELSHOP is prepared but for some reasons it fails. I didn't have time yet to investigate this issue.)
-	//              - DHL WARENPOST INTERNATIONAL (for inside & outside EU) 
-	//                 => !! ATTENTION: This is not the German Post "Warenpost International" tariff. They also offer this product on small labels !!
 	
 	
 	
@@ -82,11 +76,11 @@
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------
 	define( '_WORKING_MODE_', 'SANDBOX');							// Change this from 'SANDBOX' to 'LIVE' for production mode
 	
-	define( '_DHL_Entwickler_ID_', 'Your SANDBOX user-ID: look for it in your entwickler.dhl.de account');		// SANDBOX-USER
+	define( '_DHL_Entwickler_ID_', 'bsv-lohmaier94577');		// SANDBOX-USER
 	define( '_DHL_APP_ID_', 'Your APP ID');							// LIVE-USER
 
-	define( '_DHL_WebSitePass_', 'Your SANDBOX pass = pass for entwickler.dhl.de account');		// SANDBOX-PASS
-	define( '_DHL_TOKEN_', 'Your Token');							// LIVE-PASS
+	define( '_DHL_WebSitePass_', 'Europameister2021!');		// SANDBOX-PASS
+	define( '_DHL_TOKEN_', 'Your Token');									// LIVE-PASS
 
 	// Read this block about sufficient access rights for saving files to your server directory:
 	define('_SAVE_REQUEST_TO_FILE_', TRUE);
