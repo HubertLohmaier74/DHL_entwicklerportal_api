@@ -9,6 +9,7 @@
 //	
 //  - 06.05.2021:	- Methode addCompany(): new optional param $reference added (ShipperReference)
 //  - 22.02.2022:	- Bug eliminated that was responsible for saving only the last api request-file to disk (now millseconds are included in filename)
+//  - 24.02.2022:   - api request-file: date format in filename reset to former format Y-m-d (instead of m-d-Y)
 // ***************************************************************************************
 
 require_once('dhl_gks_labelcreator.php');
@@ -94,7 +95,7 @@ class DHLParcel {
 				
 		// Filename setup
 		$now = DateTime::createFromFormat('U.u', microtime(true));
-		$requestFile = $requestDir . "/" . $userID . str_replace('.', $now->format("m-d-Y H:i:s.u") . '.', $requestFile);
+		$requestFile = $requestDir . "/" . $userID . str_replace('.', $now->format("Y-m-d H:i:s-u") . '.', $requestFile);
 		if ($this->storeRequests) {
 
 			// Create DIR if it does not exist
